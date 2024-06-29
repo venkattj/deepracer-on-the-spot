@@ -1,33 +1,61 @@
+import math
+
 def reward_function(params):
-    '''
-    Example of penalize steering, which helps mitigate zig-zag behaviors
-    '''
-    
-    # Read input parameters
-    distance_from_center = params['distance_from_center']
+
     track_width = params['track_width']
-    steering = abs(params['steering_angle']) # Only need the absolute steering angle
+    distance_from_center = params['distance_from_center']
+    steering = abs(params['steering_angle'])
+    direction_stearing=params['steering_angle']
+    speed = params['speed']
+    steps = params['steps']
+    progress = params['progress']
 
-    # Calculate 3 marks that are farther and father away from the center line
-    marker_1 = 0.1 * track_width
-    marker_2 = 0.25 * track_width
-    marker_3 = 0.5 * track_width
-
-    # Give higher reward if the car is closer to center line and vice versa
-    if distance_from_center <= marker_1:
-        reward = 1
-    elif distance_from_center <= marker_2:
-        reward = 0.5
-    elif distance_from_center <= marker_3:
-        reward = 0.1
-    else:
-        reward = 1e-3  # likely crashed/ close to off track
-
-    # Steering penality threshold, change the number based on your action space setting
+    all_wheels_on_track = params['all_wheels_on_track']
     ABS_STEERING_THRESHOLD = 15
+    SPEED_THRESHOLD = 3
+    TOTAL_NUM_STEPS = 85
 
-    # Penalize reward if the car is steering too much
-    if steering > ABS_STEERING_THRESHOLD:
-        reward *= 0.8
 
+
+    # Read input variables
+    waypoints = params['waypoints']
+    closest_waypoints = params['closest_waypoints']
+    heading = params['heading']
+    reward = 1.0
+
+    if(all_wheels_on_track == True):
+        reward *= 5.0
+
+    else:
+        reward -= 5.0
+    if progress == 100:
+        reward += 100
+
+    if not all_wheels_on_track:
+        # Penalize if the car goes off track
+        reward -= 1e-3
+    elif speed < SPEED_THRESHOLD:
+        # Penalize if the car goes too slow
+        reward += 2.20
+    else:
+        # High reward if the car stays on track and goes fast
+        reward *= 3.0
+
+    # Calculate the direction of the center line based on the closest waypoints
+    next_point = waypoints[closest_waypoints[1]]
+    prev_point = waypoints[closest_waypoints[0]]
+    # Calculate the direction in radius, arctan2(dy, dx), the result is (-pi, pi) in radians
+    track_direction = math.atan2(next_point[1] - prev_point[1], next_point[0] - prev_point[0])
+    # Convert to degree
+    track_direction = math.degrees(track_direction)
+    # Calculate the difference between the track direction and the heading direction of the car
+    direction_difference = abs(track_direction - heading)
+    # Penalize the reward if the difference is too large
+    DIRECTION_THRESHOLD = 10.0
+    vid=1
+    if direction_difference > DIRECTION_THRESHOLD:
+        vid=1-(direction_difference/50)
+    if vid<0 or vid>1:
+        vid = 0
+        reward *= vid
     return float(reward)
