@@ -25,6 +25,10 @@ def reward_function(params):
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 2.0
 
+    # Early termination if the car is off track
+    if is_offtrack:
+        return 1e-3
+
     # Get the current and next waypoints
     next_point = waypoints[closest_waypoints[1]]
     prev_point = waypoints[closest_waypoints[0]]
@@ -37,13 +41,6 @@ def reward_function(params):
     direction_diff = abs(track_direction - heading)
     if direction_diff > 180:
         direction_diff = 360 - direction_diff
-
-    # Calculate the direction of the bend
-    bend_direction = track_direction - heading
-    if bend_direction > 180:
-        bend_direction -= 360
-    elif bend_direction < -180:
-        bend_direction += 360
 
     # Calculate scaled distance from center
     distance_from_center_scaled = distance_from_center / (track_width / 2.0)
@@ -76,7 +73,7 @@ def reward_function(params):
     if direction_diff > DIRECTION_DIFF_THRESHOLD:
         bend_penalty -= distance_from_center_scaled * 1.5
         # Adjust for left and right bends
-        if bend_direction > 0:  # Right bend
+        if track_direction > heading:  # Right bend
             if distance_from_center > 0:  # If car is on the left side
                 bend_penalty *= 0.5  # Penalize more
         else:  # Left bend
@@ -89,9 +86,5 @@ def reward_function(params):
     # Add progress-based reward
     progress_reward = progress * 0.1
     reward += progress_reward
-
-    # Strongly penalize if the car is off track
-    if is_offtrack:
-        reward = 1e-3
 
     return float(reward)
