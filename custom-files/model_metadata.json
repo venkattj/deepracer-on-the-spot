@@ -2,7 +2,7 @@
     "action_space": [
         {
             "steering_angle": -30,
-            "speed": 1.45
+            "speed": 1.55
         },
         {
             "steering_angle": -30,
@@ -10,7 +10,7 @@
         },
         {
             "steering_angle": -30,
-            "speed": 2.25
+            "speed": 2.1
         },
         {
             "steering_angle": -20,
@@ -18,7 +18,7 @@
         },
         {
             "steering_angle": -20,
-            "speed": 2.25
+            "speed": 2.35
         },
         {
             "steering_angle": -20,
@@ -38,7 +38,7 @@
         },
         {
             "steering_angle": 0,
-            "speed": 2.1
+            "speed": 2.4
         },
         {
             "steering_angle": 0,
@@ -58,7 +58,7 @@
         },
         {
             "steering_angle": 10,
-            "speed": 3.45
+            "speed": 3.55
         },
         {
             "steering_angle": 20,
@@ -66,7 +66,7 @@
         },
         {
             "steering_angle": 20,
-            "speed": 2.25
+            "speed": 2.35
         },
         {
             "steering_angle": 20,
@@ -74,7 +74,7 @@
         },
         {
             "steering_angle": 30,
-            "speed": 1.45
+            "speed": 1.55
         },
         {
             "steering_angle": 30,
@@ -82,7 +82,7 @@
         },
         {
             "steering_angle": 30,
-            "speed": 2.25
+            "speed": 2.1
         }
     ],
     "sensor": ["FRONT_FACING_CAMERA"],
