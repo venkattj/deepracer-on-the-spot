@@ -11,6 +11,8 @@ def reward_function(params):
     distance_from_center = params['distance_from_center']
     speed = params['speed']
     steering = abs(params['steering_angle'])
+    steering_angle = params['steering_angle']
+    is_left_of_center = params['is_left_of_center']
     is_offtrack = params['is_offtrack']
     waypoints = params['waypoints']
     closest_waypoints = params['closest_waypoints']
@@ -74,11 +76,17 @@ def reward_function(params):
         bend_penalty -= distance_from_center_scaled * 1.5
         # Adjust for left and right bends
         if track_direction > heading:  # Right bend
-            if distance_from_center > 0:  # If car is on the left side
+            if is_left_of_center or steering_angle > 0:  # If car is on the left side
                 bend_penalty *= 0.5  # Penalize more
+            else:
+                bend_penalty *= 1.5
+                print('right turn')
         else:  # Left bend
-            if distance_from_center < 0:  # If car is on the right side
+            if not(is_left_of_center) or steering_angle < 0:  # If car is on the right side
                 bend_penalty *= 0.5  # Penalize more
+            else:
+                bend_penalty *= 1.5
+                print('left turn')
 
     # Calculate the weighted reward
     reward = (center_reward * 2.0 + speed_reward * 3.0 + steering_penalty * 2.0) * bend_penalty
