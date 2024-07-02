@@ -22,7 +22,7 @@ def reward_function(params):
     # Constants
     ABS_STEERING_THRESHOLD = 10
     SPEED_THRESHOLD = 1.8
-    MAX_SPEED_THRESHOLD = 2.8
+    MAX_SPEED_THRESHOLD = 3.6
     DIRECTION_DIFF_THRESHOLD = 15
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 2.0
@@ -64,9 +64,9 @@ def reward_function(params):
 
     # Encourage speed with penalties for going too slow or too fast
     if speed < SPEED_THRESHOLD:
-        speed_reward = LOW_SPEED_PENALTY*speed
+        speed_reward = LOW_SPEED_PENALTY
     elif speed > MAX_SPEED_THRESHOLD:
-        speed_reward = HIGH_SPEED_BONUS*speed
+        speed_reward = HIGH_SPEED_BONUS
     else:
         speed_reward = speed * 1.5
 
@@ -80,13 +80,11 @@ def reward_function(params):
                 bend_penalty *= 0.5  # Penalize more
             else:
                 bend_penalty *= 1.5
-                print('right turn')
         else:  # Left bend
             if not(is_left_of_center) or steering_angle < 0:  # If car is on the right side
                 bend_penalty *= 0.5  # Penalize more
             else:
                 bend_penalty *= 1.5
-                print('left turn')
 
     # Calculate the weighted reward
     reward = (center_reward * 2.0 + speed_reward * 3.0 + steering_penalty * 2.0) * bend_penalty
