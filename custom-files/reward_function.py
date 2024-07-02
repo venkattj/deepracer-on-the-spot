@@ -1,6 +1,5 @@
 import math
 
-
 class Reward:
     def __init__(self):
         self.prev_speed = 0
@@ -14,6 +13,7 @@ class Reward:
         heading = params['heading']
         steering_angle = params['steering_angle']
         is_offtrack = params['is_offtrack']
+        progress = params['progress']
 
         if is_offtrack:
             return 1e-3
@@ -32,17 +32,19 @@ class Reward:
         # Calculate smooth steering reward
         reward_steering_smoothness = self.calculate_steering_smoothness_reward(steering_angle)
 
-        # Combine rewards with appropriate weights
+        # Reward based on progress
+        reward_progress = self.calculate_progress_reward(progress)
 
-        reward = 0.6 * reward_speed + 0.3 * reward_alignment + 0.1 * reward_steering_smoothness
+        # Combine rewards with appropriate weights
+        reward = 0.6 * reward_speed + 0.3 * reward_alignment + 0.1 * reward_steering_smoothness + reward_progress
 
         return float(reward)
 
     def calculate_speed_reward(self, speed):
         reward = 1.0
-        if speed < 1.3:
+        if speed < 1.5:
             reward *= 0.3
-        elif speed > 2.5:
+        elif speed > 2.8:
             reward *= 1.4  # Increase the base reward for higher speed
         return reward
 
@@ -66,11 +68,13 @@ class Reward:
         self.prev_steering_angle = steering_angle
         return reward_steering_smoothness
 
+    def calculate_progress_reward(self, progress):
+        # Reward increases linearly with progress
+        reward_progress = 0.2 * progress  # Adjust weight as needed
+        return reward_progress
+
 # Initialize Reward object
-
-
 reward_obj = Reward()
-
 
 def reward_function(params):
     return reward_obj.reward_function(params)
