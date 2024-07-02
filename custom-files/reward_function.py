@@ -1,5 +1,6 @@
 import math
 
+
 class Reward:
     def __init__(self):
         self.prev_speed = 0
@@ -36,16 +37,16 @@ class Reward:
         reward_progress = self.calculate_progress_reward(progress)
 
         # Combine rewards with appropriate weights
-        reward = 0.6 * reward_speed + 0.3 * reward_alignment + 0.1 * reward_steering_smoothness + reward_progress
+        reward = 0.55 * reward_speed + 0.28 * reward_alignment + 0.17 * reward_steering_smoothness + reward_progress
 
         return float(reward)
 
     def calculate_speed_reward(self, speed):
         reward = 1.0
-        if speed < 1.5:
-            reward *= 0.3
-        elif speed > 2.8:
-            reward *= 1.4  # Increase the base reward for higher speed
+        if speed < 1.2:
+            reward *= 0.2
+        elif speed > 2.5:
+            reward *= 1.5  # Increase the base reward for higher speed
         return reward
 
     def find_next_three_waypoints(self, params):
@@ -74,7 +75,10 @@ class Reward:
         return reward_progress
 
 # Initialize Reward object
+
+
 reward_obj = Reward()
+
 
 def reward_function(params):
     return reward_obj.reward_function(params)
