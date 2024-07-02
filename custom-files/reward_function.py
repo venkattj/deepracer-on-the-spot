@@ -13,6 +13,10 @@ class Reward:
         speed = params['speed']
         heading = params['heading']
         steering_angle = params['steering_angle']
+        is_offtrack = params['is_offtrack']
+
+        if is_offtrack:
+            return 1e-3
 
         # Calculate speed reward
         reward_speed = self.calculate_speed_reward(speed)
@@ -29,6 +33,7 @@ class Reward:
         reward_steering_smoothness = self.calculate_steering_smoothness_reward(steering_angle)
 
         # Combine rewards with appropriate weights
+
         reward = 0.6 * reward_speed + 0.3 * reward_alignment + 0.1 * reward_steering_smoothness
 
         return float(reward)
