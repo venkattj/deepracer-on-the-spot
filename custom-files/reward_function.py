@@ -64,9 +64,9 @@ def reward_function(params):
 
     # Encourage speed with penalties for going too slow or too fast
     if speed < SPEED_THRESHOLD:
-        speed_reward = LOW_SPEED_PENALTY
+        speed_reward = LOW_SPEED_PENALTY*speed
     elif speed > MAX_SPEED_THRESHOLD:
-        speed_reward = HIGH_SPEED_BONUS
+        speed_reward = HIGH_SPEED_BONUS*speed
     else:
         speed_reward = speed * 1.5
 
