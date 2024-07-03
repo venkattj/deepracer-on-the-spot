@@ -11,8 +11,6 @@ def reward_function(params):
     distance_from_center = params['distance_from_center']
     speed = params['speed']
     steering = abs(params['steering_angle'])
-    steering_angle = params['steering_angle']
-    is_left_of_center = params['is_left_of_center']
     is_offtrack = params['is_offtrack']
     waypoints = params['waypoints']
     closest_waypoints = params['closest_waypoints']
@@ -21,15 +19,11 @@ def reward_function(params):
 
     # Constants
     ABS_STEERING_THRESHOLD = 10
-    SPEED_THRESHOLD = 1.7
-    MAX_SPEED_THRESHOLD = 3.1
+    SPEED_THRESHOLD = 1.5
+    MAX_SPEED_THRESHOLD = 2.8
     DIRECTION_DIFF_THRESHOLD = 15
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 2.0
-
-    # Early termination if the car is off track
-    if is_offtrack:
-        return 1e-3
 
     # Get the current and next waypoints
     next_point = waypoints[closest_waypoints[1]]
@@ -83,10 +77,10 @@ def reward_function(params):
         bend_penalty -= distance_from_center_scaled * 1.5
         # Adjust for left and right bends
         if bend_direction > 0:  # Right bend
-            if is_left_of_center or steering_angle > 0:  # If car is on the left side
+            if distance_from_center > 0:  # If car is on the left side
                 bend_penalty *= 0.5  # Penalize more
         else:  # Left bend
-            if not(is_left_of_center) or steering_angle < 0:  # If car is on the right side
+            if distance_from_center < 0:  # If car is on the right side
                 bend_penalty *= 0.5  # Penalize more
 
     # Calculate the weighted reward
