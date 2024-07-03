@@ -14,13 +14,14 @@ class Reward:
         heading = params['heading']
         steering_angle = params['steering_angle']
         is_offtrack = params['is_offtrack']
-        progress = params['progress']
+        distance_from_center = params['distance_from_center']
+        track_width = params['track_width']
 
         if is_offtrack:
             return 1e-3
 
         # Calculate speed reward
-        reward_speed = self.calculate_speed_reward(speed)
+        reward_speed = self.calculate_speed_reward(speed, distance_from_center, track_width)
 
         # Find next waypoints
         next_points = self.find_next_three_waypoints(params)
@@ -30,23 +31,38 @@ class Reward:
         # Calculate alignment reward
         reward_alignment = self.calculate_alignment_reward(x, y, x_forward, y_forward, heading)
 
+        # Calculate steering speed reward
+
+        reward_steering_speed = self.optimal_steering_speed_reward(params, next_points)
+
         # Calculate smooth steering reward
         reward_steering_smoothness = self.calculate_steering_smoothness_reward(steering_angle)
 
-        # Reward based on progress
-        reward_progress = self.calculate_progress_reward(progress)
-
         # Combine rewards with appropriate weights
-        reward = 0.55 * reward_speed + 0.28 * reward_alignment + 0.17 * reward_steering_smoothness + reward_progress
+
+        reward = 0.5 * reward_speed + 0.2 * reward_alignment + 0.2 * reward_steering_speed + 0.1 * reward_steering_smoothness
+        print(x, y, reward)
 
         return float(reward)
 
-    def calculate_speed_reward(self, speed):
+    def calculate_speed_reward(self, speed, distance_from_center, track_width):
         reward = 1.0
-        if speed < 1.2:
-            reward *= 0.2
-        elif speed > 2.5:
-            reward *= 1.5  # Increase the base reward for higher speed
+        w1 = 4.0
+        w2 = 1.0
+
+        # Decrease Reward of position, if DeepRacer tries to slow down
+        if speed < 1.3:
+            w2 = 0.3
+        # Increase Reward if DeepRacer goes fast
+        if speed > 2.5:
+            w1 += 1
+
+        # Calculate scaled distance from center
+        distance_from_center_scaled = distance_from_center / (track_width / 2.0)
+
+        # Subtract scaled distance from center from 1 to give higher reward when car is closer to center
+        # Provide Weighted Reward while prioritizing speed
+        reward = w1 * speed + w2 * (1.0 - distance_from_center_scaled)
         return reward
 
     def find_next_three_waypoints(self, params):
@@ -54,6 +70,15 @@ class Reward:
         closest_waypoint = params['closest_waypoints'][1]
         next_points = [(closest_waypoint + i) % len(waypoints) for i in range(3)]
         return next_points
+
+    def angle_between_points(self, first_point, x, third_point):
+        """Calculates the angle between two line segments formed by three points."""
+        first_dx = first_point[0] - x
+        first_dy = first_point[1] - 0
+        third_dx = third_point[0] - x
+        third_dy = third_point[1] - 0
+        angle = math.atan2(third_dy, third_dx) - math.atan2(first_dy, first_dx)
+        return math.degrees(angle)
 
     def calculate_alignment_reward(self, x, y, x_forward, y_forward, heading):
         optimal_heading = math.degrees(math.atan2(y_forward - y, x_forward - x))
@@ -69,10 +94,23 @@ class Reward:
         self.prev_steering_angle = steering_angle
         return reward_steering_smoothness
 
-    def calculate_progress_reward(self, progress):
-        # Reward increases linearly with progress
-        reward_progress = 0.2 * progress  # Adjust weight as needed
-        return reward_progress
+    def optimal_steering_speed_reward(self, params, next_points):
+        waypoints = params['waypoints']
+        x = params['x']
+        # Calculate curvature
+        first_point = waypoints[next_points[0]]
+        third_point = waypoints[next_points[2]]
+        curvature = self.angle_between_points(first_point, x, third_point)
+
+        # Optimal speed based on curvature
+        min_speed, max_speed = 1, 4
+        # Changed to continuous function for optimal speed calculation
+        optimal_speed = max_speed - (curvature / 180) * (max_speed - min_speed)
+
+        # Calculate reward for speed
+        speed_diff = abs(params['speed'] - optimal_speed)
+        reward_speed = math.exp(-0.5 * speed_diff)
+        return reward_speed
 
 # Initialize Reward object
 
