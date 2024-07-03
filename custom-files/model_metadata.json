@@ -22,7 +22,7 @@
         },
         {
             "steering_angle": -20,
-            "speed": 2.85
+            "speed": 2.75
         },
         {
             "steering_angle": -10,
@@ -30,11 +30,11 @@
         },
         {
             "steering_angle": -10,
-            "speed": 2.65
+            "speed": 2.45
         },
         {
             "steering_angle": -10,
-            "speed": 3.45
+            "speed": 3.35
         },
         {
             "steering_angle": 0,
@@ -54,7 +54,7 @@
         },
         {
             "steering_angle": 10,
-            "speed": 2.45
+            "speed": 2.35
         },
         {
             "steering_angle": 10,
