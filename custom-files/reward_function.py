@@ -85,9 +85,13 @@ def reward_function(params):
         if bend_direction > 0:  # Right bend
             if is_left_of_center or steering_angle > 0:  # If car is on the left side
                 bend_penalty *= 0.5  # Penalize more
+            else:
+                bend_penalty *= 1.5
         else:  # Left bend
             if not(is_left_of_center) or steering_angle < 0:  # If car is on the right side
                 bend_penalty *= 0.5  # Penalize more
+            else:
+                bend_penalty *= 1.5
 
     # Calculate the weighted reward
     reward = (center_reward * 2.0 + speed_reward * 3.0 + steering_penalty * 2.0) * bend_penalty
