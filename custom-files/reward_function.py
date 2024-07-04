@@ -82,6 +82,8 @@ def reward_function(params):
             center_reward = 1.0
         if steering > ABS_STEERING_THRESHOLD:
             steering_penalty = 1
+        else:
+            steering_penalty = 0.5
         if speed > 2.6:
             speed_reward = 1
         if speed < 1.3:
