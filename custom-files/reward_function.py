@@ -34,7 +34,7 @@ class Reward:
 
         # Combine rewards with appropriate weights
 
-        reward = 0.6 * reward_speed + 0.6 * reward_alignment + 0.3 * reward_steering_smoothness
+        reward = 0.6 * reward_speed +  reward_alignment + 0.5 * reward_steering_smoothness
 
         return float(reward)
 
