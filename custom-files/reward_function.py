@@ -34,16 +34,18 @@ class Reward:
 
         # Combine rewards with appropriate weights
 
-        reward = 0.6 * reward_speed + 0.3 * reward_alignment + 0.1 * reward_steering_smoothness
+        reward = 0.6 * reward_speed + 0.6 * reward_alignment + 0.3 * reward_steering_smoothness
 
         return float(reward)
 
     def calculate_speed_reward(self, speed):
         reward = 1.0
-        if speed < 1.3:
+        if speed < 1.5:
             reward *= 0.3
-        elif speed > 2.5:
-            reward *= 1.4  # Increase the base reward for higher speed
+        elif speed > 3.6:
+            reward *= 0.3  # Increase the base reward for higher speed
+        else:
+            reward = speed * 1.5
         return reward
 
     def find_next_three_waypoints(self, params):
@@ -65,6 +67,7 @@ class Reward:
         reward_steering_smoothness = math.exp(-0.5 * steering_diff)
         self.prev_steering_angle = steering_angle
         return reward_steering_smoothness
+
 
 # Initialize Reward object
 
