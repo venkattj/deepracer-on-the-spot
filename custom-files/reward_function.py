@@ -21,8 +21,8 @@ def reward_function(params):
 
     # Constants
     ABS_STEERING_THRESHOLD = 10
-    SPEED_THRESHOLD = 1.7
-    MAX_SPEED_THRESHOLD = 3.1
+    SPEED_THRESHOLD = 1.5
+    MAX_SPEED_THRESHOLD = 3.5
     DIRECTION_DIFF_THRESHOLD = 15
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 2.0
@@ -53,7 +53,6 @@ def reward_function(params):
 
     # Calculate scaled distance from center
     distance_from_center_scaled = distance_from_center / (track_width / 2.0)
-
     # Penalty for high steering angles
     steering_penalty = 1.0
     if steering > ABS_STEERING_THRESHOLD:
