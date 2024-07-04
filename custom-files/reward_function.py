@@ -18,6 +18,7 @@ def reward_function(params):
     closest_waypoints = params['closest_waypoints']
     heading = params['heading']
     progress = params['progress']
+    steps = params['steps']
     all_wheels_on_track = params['all_wheels_on_track']
 
     # Constants
@@ -27,8 +28,9 @@ def reward_function(params):
     DIRECTION_DIFF_THRESHOLD = 15
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 4
+    TOTAL_NUM_STEPS = 300
 
-    # Early termination if the car is off track
+# Early termination if the car is off track
     if is_offtrack:
         return 1e-3
 
@@ -114,5 +116,9 @@ def reward_function(params):
 
     if all_wheels_on_track:
         reward += 10
+    # Initialize the reward with typical value
+    # Give additional reward if the car pass every 50 steps faster than expected
+    if (steps % 50) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 50:
+        reward += 250
 
     return float(reward)
