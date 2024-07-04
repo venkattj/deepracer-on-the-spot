@@ -28,7 +28,7 @@ def reward_function(params):
     DIRECTION_DIFF_THRESHOLD = 15
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 4
-    TOTAL_NUM_STEPS = 300
+    TOTAL_NUM_STEPS = 290
 
 # Early termination if the car is off track
     if is_offtrack:
@@ -117,9 +117,9 @@ def reward_function(params):
     if all_wheels_on_track:
         reward += 10
     # Give additional reward if the car pass every 30 steps faster than expected
-    if (steps % 30) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
+    if (steps % 29) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
         reward += 150
-    elif (steps % 30) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
+    elif (steps % 29) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
         reward -= 100
 
     return float(reward)
