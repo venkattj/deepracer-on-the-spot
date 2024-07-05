@@ -23,8 +23,8 @@ def reward_function(params):
 
     # Constants
     ABS_STEERING_THRESHOLD = 10
-    SPEED_THRESHOLD = 2.5
-    MAX_SPEED_THRESHOLD = 3.7
+    SPEED_THRESHOLD = 1.8
+    MAX_SPEED_THRESHOLD = 3.4
     DIRECTION_DIFF_THRESHOLD = 15
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 4
@@ -117,9 +117,9 @@ def reward_function(params):
     if all_wheels_on_track:
         reward += 10
     # Give additional reward if the car pass every 30 steps faster than expected
-    if (steps % 15) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
-        reward += 75
-    elif (steps % 15) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
-        reward -= 50
+    if (steps % 10) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
+        reward += 50
+    elif (steps % 10) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
+        reward -= 30
 
     return float(reward)
