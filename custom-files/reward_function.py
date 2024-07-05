@@ -119,7 +119,7 @@ def reward_function(params):
     # Give additional reward if the car pass every 30 steps faster than expected
     if (steps % 15) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
         reward += 75
-    elif (steps % 30) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
+    elif (steps % 15) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
         reward -= 50
 
     return float(reward)
