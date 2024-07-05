@@ -86,7 +86,7 @@ def reward_function(params):
             center_reward = 0.3
         elif distance_from_center_scaled <= 0.5:
             center_reward = 0.7
-        elif distance_from_center <= 0.8:
+        elif distance_from_center_scaled <= 0.8:
             center_reward = 1
         else:
             center_reward = 0
