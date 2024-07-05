@@ -22,13 +22,12 @@ def reward_function(params):
     all_wheels_on_track = params['all_wheels_on_track']
 
     # Constants
-    ABS_STEERING_THRESHOLD = 10
+    ABS_STEERING_THRESHOLD = 15
     SPEED_THRESHOLD = 1.8
-    MAX_SPEED_THRESHOLD = 3.4
-    DIRECTION_DIFF_THRESHOLD = 15
+    MAX_SPEED_THRESHOLD = 3.7
     LOW_SPEED_PENALTY = 0.5
-    HIGH_SPEED_BONUS = 4
-    TOTAL_NUM_STEPS = 310
+    HIGH_SPEED_BONUS = 2
+    TOTAL_NUM_STEPS = 300
 
 # Early termination if the car is off track
     if is_offtrack:
@@ -79,8 +78,8 @@ def reward_function(params):
 
     # Adjust reward for bends
     bend_penalty = 1 - distance_from_center_scaled * 1.5
-    if direction_diff > DIRECTION_DIFF_THRESHOLD:
-        bend_penalty = 1.0
+    if direction_diff > ABS_STEERING_THRESHOLD:
+        bend_penalty = 0.8
         if distance_from_center_scaled <= 0.1:
             center_reward = 0.1
         elif distance_from_center_scaled <= 0.25:
@@ -94,32 +93,27 @@ def reward_function(params):
         else:
             steering_penalty = 0.5
         if speed > 2.6:
-            speed_reward = 1
+            speed_reward = HIGH_SPEED_BONUS
         if speed < 1.5:
-            speed_reward = 0.5
+            speed_reward = LOW_SPEED_PENALTY
         # Adjust for left and right bends
         if bend_direction > 0:  # Right bend
             if is_left_of_center or steering_angle > 0:  # If car is on the left side
-                bend_penalty *= 0.1  # Penalize more
+                bend_penalty *= 0.5  # Penalize more
             else:
-                bend_penalty *= 1
+                bend_penalty *= distance_from_center_scaled
         else:  # Left bend
             if not(is_left_of_center) or steering_angle < 0:  # If car is on the right side
                 bend_penalty *= 0.1  # Penalize more
             else:
-                bend_penalty *= 1.5
+                bend_penalty *= distance_from_center_scaled
 
     reward = (center_reward * 2.0 + speed_reward * 3.0 + steering_penalty * 2.0) * bend_penalty
 
-    progress_reward = progress * 0.1
-    reward += progress_reward
-
-    if all_wheels_on_track:
-        reward += 10
     # Give additional reward if the car pass every 30 steps faster than expected
-    if (steps % 62) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
-        reward += 300
-    elif (steps % 62) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
-        reward -= 150
+    if (steps % 10) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
+        reward += 30
+    elif (steps % 10) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
+        reward -= 15
 
     return float(reward)
