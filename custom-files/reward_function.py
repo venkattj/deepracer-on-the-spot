@@ -84,8 +84,10 @@ def reward_function(params):
             center_reward = 0.1
         elif distance_from_center_scaled <= 0.25:
             center_reward = 0.3
-        elif distance_from_center_scaled <= 0.5 and distance_from_center < 0.8:
-            center_reward = 1.0
+        elif distance_from_center_scaled <= 0.5:
+            center_reward = 0.7
+        elif distance_from_center <= 0.8:
+            center_reward = 1
         else:
             center_reward = 0
         if steering > ABS_STEERING_THRESHOLD:
