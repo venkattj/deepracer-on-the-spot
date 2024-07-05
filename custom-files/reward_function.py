@@ -117,9 +117,9 @@ def reward_function(params):
     if all_wheels_on_track:
         reward += 10
     # Give additional reward if the car pass every 30 steps faster than expected
-    if (steps % 31) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
-        reward += 150
-    elif (steps % 31) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
-        reward -= 100
+    if (steps % 62) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
+        reward += 300
+    elif (steps % 62) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
+        reward -= 150
 
     return float(reward)
