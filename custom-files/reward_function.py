@@ -105,7 +105,7 @@ def reward_function(params):
                 bend_penalty *= 1.2
         else:  # Left bend
             if not(is_left_of_center) or steering_angle < 0:  # If car is on the right side
-                bend_penalty *= 0.5  # Penalize more
+                bend_penalty *= 0.1  # Penalize more
             else:
                 bend_penalty *= 1.2
 
