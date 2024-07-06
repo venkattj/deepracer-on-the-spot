@@ -19,7 +19,6 @@ def reward_function(params):
     heading = params['heading']
     progress = params['progress']
     steps = params['steps']
-    all_wheels_on_track = params['all_wheels_on_track']
 
     # Constants
     ABS_STEERING_THRESHOLD = 15
@@ -46,12 +45,19 @@ def reward_function(params):
     if direction_diff > 180:
         direction_diff = 360 - direction_diff
 
-     # Calculate scaled distance from center
+    bend_direction = track_direction - heading
+    if bend_direction > 180:
+        bend_direction -= 360
+    elif bend_direction < -180:
+        bend_direction += 360
+    # Calculate scaled distance from center
     distance_from_center_scaled = distance_from_center / (track_width / 2.0)
     # Penalty for high steering angles
     steering_penalty = 1.0
+    if steering > 10:
+        steering_penalty = 0.5
     if steering > ABS_STEERING_THRESHOLD:
-        steering_penalty -= 0.5
+        steering_penalty = 0.2
 
     # Reward for staying on the center line
     if distance_from_center_scaled <= 0.1:
@@ -74,7 +80,6 @@ def reward_function(params):
     # Adjust reward for bends
     bend_penalty = 1 - distance_from_center_scaled * 1.5
     if direction_diff > ABS_STEERING_THRESHOLD:
-        bend_penalty = 1
         if distance_from_center_scaled <= 0.1:
             center_reward = 0.1
         elif distance_from_center_scaled <= 0.25:
@@ -87,18 +92,24 @@ def reward_function(params):
         if steering > ABS_STEERING_THRESHOLD:
             steering_penalty = 1
         else:
-            steering_penalty = 0.5
+            steering_penalty = 0.2
         if speed > 2.5:
             speed_reward = HIGH_SPEED_BONUS
         if speed < 1.8:
             speed_reward = LOW_SPEED_PENALTY
-        # Adjust for left and right bends
-        if is_left_of_center and steering_angle > 0:  # If car is on the left side
-            bend_penalty *= 1.2  # Penalize more
-        elif not(is_left_of_center) and steering_angle < 0:  # If car is on the right side
-            bend_penalty *= 1.2  # Penalize more
-        else:
-            bend_penalty *= 0.5
+        bend_penalty = 1
+
+    # Adjust for left and right bends
+        if bend_direction > 0:  # Right bend
+            if is_left_of_center or steering_angle > 0:  # If car is on the left side
+                bend_penalty *= 0.2  # Penalize more
+            else:
+                bend_penalty *= 1
+        else:  # Left bend
+            if not(is_left_of_center) or steering_angle < 0:  # If car is on the right side
+                bend_penalty *= 0.2  # Penalize more
+            else:
+                bend_penalty *= 1
 
     reward = (center_reward * 2.0 + speed_reward * 3.0 + steering_penalty * 2.0) * bend_penalty
 
