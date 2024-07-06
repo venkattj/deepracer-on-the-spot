@@ -111,7 +111,7 @@ def reward_function(params):
             else:
                 bend_penalty *= 1
 
-    reward = (center_reward * 2.0 + speed_reward * 3.0 + steering_penalty * 2.0) * bend_penalty
+    reward = (center_reward * 2.0 + speed_reward * 3.5 + steering_penalty * 2.0) * bend_penalty
 
     # Give additional reward if the car pass every 30 steps faster than expected
     if (steps % 29) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
