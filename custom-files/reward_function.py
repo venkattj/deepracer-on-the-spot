@@ -80,11 +80,11 @@ def reward_function(params):
     # Adjust reward for bends
     bend_penalty = 1 - distance_from_center_scaled * 1.5
     if direction_diff > ABS_STEERING_THRESHOLD:
-        if distance_from_center_scaled <= 0.1:
+        if distance_from_center_scaled <= 0.25:
             center_reward = 0.1
-        elif distance_from_center_scaled <= 0.25:
-            center_reward = 0.3
         elif distance_from_center_scaled <= 0.5:
+            center_reward = 0.3
+        elif distance_from_center_scaled <= 0.8:
             center_reward = 0.7
         else:
             center_reward = 1
@@ -111,7 +111,7 @@ def reward_function(params):
             else:
                 bend_penalty *= 1
 
-    reward = (center_reward * 2.0 + speed_reward * 3.5 + steering_penalty * 2.0) * bend_penalty
+    reward = (center_reward * 2.5 + speed_reward * 3.5 + steering_penalty * 2.0) * bend_penalty
 
     # Give additional reward if the car pass every 30 steps faster than expected
     if (steps % 29) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
