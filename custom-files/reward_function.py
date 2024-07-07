@@ -26,7 +26,7 @@ def reward_function(params):
     MAX_SPEED_THRESHOLD = 3.8
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 2
-    TOTAL_NUM_STEPS = 290
+    TOTAL_NUM_STEPS = 310
 
 # Early termination if the car is off track
     if is_offtrack:
@@ -69,12 +69,11 @@ def reward_function(params):
             center_reward = 0.1
         else:
             center_reward = 1e-3
-        bend_penalty = distance_from_center_scaled + 0.3
     else:
         center_reward = 0.1
-        bend_penalty = 0.1
+    bend_penalty = center_reward
 
-    # Encourage speed with penalties for going too slow or too fast
+# Encourage speed with penalties for going too slow or too fast
     if speed < SPEED_THRESHOLD:
         speed_reward = LOW_SPEED_PENALTY
     elif speed > MAX_SPEED_THRESHOLD:
@@ -92,7 +91,6 @@ def reward_function(params):
             speed_reward = HIGH_SPEED_BONUS
         if speed < 1.6:
             speed_reward = LOW_SPEED_PENALTY
-        bend_penalty = 1
     # Adjust for left and right bends
         if bend_direction > 0:  # Right bend
             if 0.7 <= distance_from_center_scaled < 0.9:
@@ -107,19 +105,19 @@ def reward_function(params):
                 center_reward = 1
             if steering_angle > 0:  # If car is on the left side
                 steering_penalty = 0.1
-                bend_penalty *= 0.1  # Penalize more
+                bend_penalty = 0.1  # Penalize more
             else:
-                bend_penalty *= 1
+                bend_penalty = 1
         else:  # Left bend
             if not(is_left_of_center) or steering_angle < 0:  # If car is on the right side
                 steering_penalty = 0.1
-                bend_penalty *= 0.1  # Penalize more
+                bend_penalty = 0.1  # Penalize more
             else:
-                bend_penalty *= 1
+                bend_penalty = 1
 
     reward = (center_reward * 2.5 + speed_reward * 3.5 + steering_penalty * 2.0) * bend_penalty
 
     # Give additional reward if the car pass every 30 steps faster than expected
-    if (steps % 29) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
-        reward += progress
+    if (steps % 30) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
+        reward += 2*progress
     return float(reward)
