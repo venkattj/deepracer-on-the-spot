@@ -22,7 +22,7 @@ def reward_function(params):
 
     # Constants
     ABS_STEERING_THRESHOLD = 15
-    SPEED_THRESHOLD = 2.3
+    SPEED_THRESHOLD = 2.1
     MAX_SPEED_THRESHOLD = 3.8
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 2
@@ -58,16 +58,19 @@ def reward_function(params):
         steering_penalty = 0.5
     if steering > ABS_STEERING_THRESHOLD:
         steering_penalty = 0.2
-
-    # Reward for staying on the center line
-    if distance_from_center_scaled <= 0.1:
-        center_reward = 1.0
-    elif distance_from_center_scaled <= 0.25:
-        center_reward = 0.7
-    elif distance_from_center_scaled <= 0.5:
-        center_reward = 0.3
+    if is_left_of_center:
+        if 0.7 <= distance_from_center_scaled < 0.9:
+            center_reward = 1.0
+        elif 0.5 <= distance_from_center_scaled < 0.7:
+            center_reward = 0.7
+        elif 0.2 <= distance_from_center_scaled < 0.5:
+            center_reward = 0.3
+        elif 0 < distance_from_center_scaled < 0.2:
+            center_reward = 0.1
+        else:
+            center_reward = 1e-3
     else:
-        center_reward = 0.1
+        center_reward = 1e-3
 
     # Encourage speed with penalties for going too slow or too fast
     if speed < SPEED_THRESHOLD:
@@ -78,30 +81,30 @@ def reward_function(params):
         speed_reward = speed * 1.5
 
     # Adjust reward for bends
-    bend_penalty = 1 - distance_from_center_scaled * 1.5
+    bend_penalty = 1.75 - distance_from_center_scaled * 1.5
     if direction_diff > ABS_STEERING_THRESHOLD:
-        if distance_from_center_scaled <= 0.25:
-            center_reward = 0.1
-        elif distance_from_center_scaled <= 0.5:
-            center_reward = 0.3
-        elif distance_from_center_scaled <= 0.8:
-            center_reward = 0.7
-        else:
-            center_reward = 1
-
         if steering > ABS_STEERING_THRESHOLD:
             steering_penalty = 1
         else:
             steering_penalty = 0.2
-        if speed > 2.7:
+        if speed > 2.6:
             speed_reward = HIGH_SPEED_BONUS
-        if speed < 1.8:
+        if speed < 1.6:
             speed_reward = LOW_SPEED_PENALTY
         bend_penalty = 1
-
     # Adjust for left and right bends
         if bend_direction > 0:  # Right bend
-            if is_left_of_center or steering_angle > 0:  # If car is on the left side
+            if 0.7 <= distance_from_center_scaled < 0.9:
+                center_reward = 1e-3
+            elif 0.5 <= distance_from_center_scaled < 0.7:
+                center_reward = 0.1
+            elif 0.2 <= distance_from_center_scaled < 0.5:
+                center_reward = 0.3
+            elif 0 < distance_from_center_scaled < 0.2:
+                center_reward = 0.7
+            else:
+                center_reward = 1
+            if steering_angle > 0:  # If car is on the left side
                 bend_penalty *= 0.2  # Penalize more
             else:
                 bend_penalty *= 1
