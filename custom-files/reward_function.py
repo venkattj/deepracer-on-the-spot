@@ -38,8 +38,8 @@ class Reward:
 
         # 4. Calculate steps progress bonus
         reward_steps_progress = 0
-        max_steps = 290
-        if steps % 72.5 == 0 and progress > ((steps/max_steps) * 100):
+        max_steps = 288
+        if steps % 72 == 0 and progress > ((steps/max_steps) * 100):
             reward_steps_progress = math.sin(steps/max_steps * math.pi/2)
 
         # Combine rewards with appropriate weights
