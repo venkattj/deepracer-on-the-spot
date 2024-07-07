@@ -69,8 +69,10 @@ def reward_function(params):
             center_reward = 0.1
         else:
             center_reward = 1e-3
+        bend_penalty = distance_from_center_scaled + 0.3
     else:
-        center_reward = 1e-3
+        center_reward = 0.1
+        bend_penalty = 0.1
 
     # Encourage speed with penalties for going too slow or too fast
     if speed < SPEED_THRESHOLD:
@@ -81,12 +83,11 @@ def reward_function(params):
         speed_reward = speed * 1.5
 
     # Adjust reward for bends
-    bend_penalty = 2*distance_from_center_scaled - 0.9
     if direction_diff > ABS_STEERING_THRESHOLD:
         if steering > ABS_STEERING_THRESHOLD:
             steering_penalty = 1
         else:
-            steering_penalty = 0.2
+            steering_penalty = 0.1
         if speed > 2.6:
             speed_reward = HIGH_SPEED_BONUS
         if speed < 1.6:
@@ -105,12 +106,14 @@ def reward_function(params):
             else:
                 center_reward = 1
             if steering_angle > 0:  # If car is on the left side
-                bend_penalty *= 0.2  # Penalize more
+                steering_penalty = 0.1
+                bend_penalty *= 0.1  # Penalize more
             else:
                 bend_penalty *= 1
         else:  # Left bend
             if not(is_left_of_center) or steering_angle < 0:  # If car is on the right side
-                bend_penalty *= 0.2  # Penalize more
+                steering_penalty = 0.1
+                bend_penalty *= 0.1  # Penalize more
             else:
                 bend_penalty *= 1
 
@@ -118,8 +121,5 @@ def reward_function(params):
 
     # Give additional reward if the car pass every 30 steps faster than expected
     if (steps % 29) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
-        reward += 50
-    elif (steps % 29) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
-        reward -= 30
-
+        reward += progress
     return float(reward)
