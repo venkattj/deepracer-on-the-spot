@@ -38,19 +38,20 @@ class Reward:
 
         # 4. Calculate steps progress bonus
         reward_steps_progress = 0
-        max_steps = 300
-        if steps % 75 == 0 and progress > ((steps/max_steps) * 100):
+        max_steps = 310
+        if steps % 50 == 0 and progress > ((steps/max_steps) * 100):
+            print("You got a bonus at ", steps)
             reward_steps_progress = math.sin(steps/max_steps * math.pi/2)
 
         # Combine rewards with appropriate weights
 
-        reward = 0.55 * reward_speed + 0.35 * reward_alignment + 0.1 * reward_steering_smoothness + reward_steps_progress
+        reward = 0.5 * reward_speed + 0.4 * reward_alignment + 0.1 * reward_steering_smoothness + reward_steps_progress
 
         return float(reward)
 
     def calculate_speed_reward(self, speed, curvature):
         # Optimal speed based on curvature
-        min_speed, max_speed = 1, 4
+        min_speed, max_speed = 2.1, 3.8
         # Changed to continuous function for optimal speed calculation
         optimal_speed = max_speed - (curvature / 180) * (max_speed - min_speed)
 
