@@ -50,15 +50,15 @@
         },
         {
             "steering_angle": 10,
-            "speed": 1.8
+            "speed": 1.7
         },
         {
             "steering_angle": 10,
-            "speed": 2.5
+            "speed": 2.3
         },
         {
             "steering_angle": 10,
-            "speed": 3.1
+            "speed": 2.8
         },
         {
             "steering_angle": 20,
@@ -66,11 +66,11 @@
         },
         {
             "steering_angle": 20,
-            "speed": 2.4
+            "speed": 2.2
         },
         {
             "steering_angle": 20,
-            "speed": 2.8
+            "speed": 2.6
         },
         {
             "steering_angle": 30,
@@ -82,7 +82,7 @@
         },
         {
             "steering_angle": 30,
-            "speed": 2.7
+            "speed": 2.5
         }
     ],
     "sensor": ["FRONT_FACING_CAMERA"],
