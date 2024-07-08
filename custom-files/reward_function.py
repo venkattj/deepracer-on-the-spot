@@ -51,7 +51,7 @@ class Reward:
 
     def calculate_speed_reward(self, speed, curvature):
         # Optimal speed based on curvature
-        min_speed, max_speed = 2.1, 3.8
+        min_speed, max_speed = 1, 4
         # Changed to continuous function for optimal speed calculation
         optimal_speed = max_speed - (curvature / 180) * (max_speed - min_speed)
 
