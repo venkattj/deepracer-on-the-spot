@@ -38,7 +38,7 @@ class Reward:
 
         # 4. Calculate steps progress bonus
         reward_steps_progress = 0
-        max_steps = 300
+        max_steps = 325
         if steps % 30 == 0 and progress > ((steps/max_steps) * 100):
             print("You got a bonus at ", steps)
             # reward_steps_progress = math.sin(steps/max_steps * math.pi/2)
