@@ -39,13 +39,15 @@ class Reward:
         # 4. Calculate steps progress bonus
         reward_steps_progress = 0
         max_steps = 310
-        if steps % 50 == 0 and progress > ((steps/max_steps) * 100):
+        if steps % 30 == 0 and progress > ((steps/max_steps) * 100):
             print("You got a bonus at ", steps)
             reward_steps_progress = math.sin(steps/max_steps * math.pi/2)
+        elif steps % 30 == 0:
+            print("You did not get bonus at ", steps)
 
         # Combine rewards with appropriate weights
 
-        reward = 0.5 * reward_speed + 0.4 * reward_alignment + 0.1 * reward_steering_smoothness + reward_steps_progress
+        reward = 0.5 * reward_speed + 0.4 * reward_alignment + 0.1 * reward_steering_smoothness + (25 * reward_steps_progress)
 
         return float(reward)
 
