@@ -23,10 +23,10 @@ def reward_function(params):
     # Constants
     ABS_STEERING_THRESHOLD = 15
     SPEED_THRESHOLD = 2.6
-    MAX_SPEED_THRESHOLD = 3.6
+    MAX_SPEED_THRESHOLD = 3.67
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 2
-    TOTAL_NUM_STEPS = 310
+    TOTAL_NUM_STEPS = 305
 
     # Early termination if the car is off track
     if is_offtrack:
