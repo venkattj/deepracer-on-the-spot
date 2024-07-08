@@ -22,8 +22,8 @@ def reward_function(params):
 
     # Constants
     ABS_STEERING_THRESHOLD = 15
-    SPEED_THRESHOLD = 2.6
-    MAX_SPEED_THRESHOLD = 3.67
+    SPEED_THRESHOLD = 2.7
+    MAX_SPEED_THRESHOLD = 3.8
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 2
     TOTAL_NUM_STEPS = 305
@@ -93,7 +93,7 @@ def reward_function(params):
             steering_penalty = 1
         else:
             steering_penalty = 0.2
-        if speed > 2.6:
+        if speed > 2.8:
             speed_reward = HIGH_SPEED_BONUS
         if speed < 1.8:
             speed_reward = LOW_SPEED_PENALTY
