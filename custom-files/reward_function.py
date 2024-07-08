@@ -93,7 +93,7 @@ def reward_function(params):
             steering_penalty = 1
         else:
             steering_penalty = 0.2
-        if speed > 2.5:
+        if speed > 2.6:
             speed_reward = HIGH_SPEED_BONUS
         if speed < 1.8:
             speed_reward = LOW_SPEED_PENALTY
