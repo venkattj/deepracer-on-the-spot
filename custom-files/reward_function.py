@@ -26,7 +26,7 @@ def reward_function(params):
     MAX_SPEED_THRESHOLD = 3.8
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 2
-    TOTAL_NUM_STEPS = 295
+    TOTAL_NUM_STEPS = 300
 
     # Early termination if the car is off track
     if is_offtrack:
@@ -116,6 +116,7 @@ def reward_function(params):
     # Give additional reward if the car pass every 30 steps faster than expected
     if (steps % 30) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
         reward += 50
+        print("step reward at", steps)
     elif (steps % 30) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
         reward -= 30
 
