@@ -13,8 +13,6 @@ class Reward:
         heading = params['heading']
         steering_angle = params['steering_angle']
         is_offtrack = params['is_offtrack']
-        steps = params['steps']
-        progress = params['progress']
 
         if is_offtrack:
             return 1e-3
@@ -36,20 +34,15 @@ class Reward:
         # 3. Calculate smooth steering reward
         reward_steering_smoothness = self.calculate_steering_smoothness_reward(steering_angle)
 
-        #
         # # 4. Calculate steps progress bonus
         # reward_steps_progress = 0
-        # max_steps = 325
-        # if steps % 30 == 0 and progress > ((steps/max_steps) * 100):
-        #     print("You got a bonus at ", steps)
-        #     # reward_steps_progress = math.sin(steps/max_steps * math.pi/2)
-        #     reward_steps_progress = progress
-        # elif steps % 30 == 0:
-        #     print("You did not get bonus at ", steps)
+        # max_steps = 300
+        # if steps % 75 == 0 and progress > ((steps/max_steps) * 100):
+        #     reward_steps_progress = math.sin(steps/max_steps * math.pi/2)
 
         # Combine rewards with appropriate weights
 
-        reward = (0.5 * reward_speed + 0.4 * reward_alignment + 0.1 * reward_steering_smoothness)
+        reward = 0.5 * reward_speed + 0.4 * reward_alignment + 0.1 * reward_steering_smoothness
 
         return float(reward)
 
