@@ -26,7 +26,7 @@ def reward_function(params):
     MAX_SPEED_THRESHOLD = 3.85
     LOW_SPEED_PENALTY = 0.5
     HIGH_SPEED_BONUS = 2
-    TOTAL_NUM_STEPS = 300
+    TOTAL_NUM_STEPS = 305
 
     # Early termination if the car is off track
     if is_offtrack:
