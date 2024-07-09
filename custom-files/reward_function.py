@@ -1,117 +1,97 @@
 import math
 
+
+class Reward:
+    def __init__(self):
+        self.prev_steering_angle = 0
+
+    def reward_function(self, params):
+        waypoints = params['waypoints']
+        x = params['x']
+        y = params['y']
+        speed = params['speed']
+        heading = params['heading']
+        steering_angle = params['steering_angle']
+        is_offtrack = params['is_offtrack']
+        steps = params['steps']
+        progress = params['progress']
+
+        if is_offtrack:
+            return 1e-3
+
+        # Find next waypoints
+        next_points = self.find_next_three_waypoints(params)
+        x_forward = waypoints[next_points[2]][0]
+        y_forward = waypoints[next_points[2]][1]
+        first_point = waypoints[next_points[0]]
+        third_point = waypoints[next_points[2]]
+        curvature = self.angle_between_points(first_point, x, third_point)
+
+        # 1. Calculate speed with angle reward
+        reward_speed = self.calculate_speed_reward(speed, curvature)
+
+        # 2. Calculate alignment reward
+        reward_alignment = self.calculate_alignment_reward(x, y, x_forward, y_forward, heading)
+
+        # 3. Calculate smooth steering reward
+        reward_steering_smoothness = self.calculate_steering_smoothness_reward(steering_angle)
+
+        # 4. Calculate steps progress bonus
+        reward_steps_progress = 0
+        max_steps = 300
+        if steps % 75 == 0 and progress > ((steps/max_steps) * 100):
+            reward_steps_progress = math.sin(steps/max_steps * math.pi/2)
+
+        # Combine rewards with appropriate weights
+
+        reward = 0.5 * reward_speed + 0.4 * reward_alignment + 0.1 * reward_steering_smoothness + reward_steps_progress
+
+        return float(reward)
+
+    def calculate_speed_reward(self, speed, curvature):
+        # Optimal speed based on curvature
+        min_speed, max_speed = 1, 4
+        # Changed to continuous function for optimal speed calculation
+        optimal_speed = max_speed - (curvature / 180) * (max_speed - min_speed)
+
+        # Calculate reward for speed
+        speed_diff = abs(speed - optimal_speed)
+        reward_speed_angle = math.exp(-0.5 * speed_diff)
+        return reward_speed_angle
+
+    def find_next_three_waypoints(self, params):
+        waypoints = params['waypoints']
+        closest_waypoint = params['closest_waypoints'][1]
+        next_points = [(closest_waypoint + i) % len(waypoints) for i in range(3)]
+        return next_points
+
+    def angle_between_points(self, first_point, x, third_point):
+        """Calculates the angle between two line segments formed by three points."""
+        first_dx = first_point[0] - x
+        first_dy = first_point[1] - 0
+        third_dx = third_point[0] - x
+        third_dy = third_point[1] - 0
+        angle = math.atan2(third_dy, third_dx) - math.atan2(first_dy, first_dx)
+        return math.degrees(angle)
+
+    def calculate_alignment_reward(self, x, y, x_forward, y_forward, heading):
+        optimal_heading = math.degrees(math.atan2(y_forward - y, x_forward - x))
+        heading_diff = abs(optimal_heading - heading)
+        if heading_diff > 180:
+            heading_diff = 360 - heading_diff
+        reward_alignment = math.cos(math.radians(heading_diff))
+        return reward_alignment
+
+    def calculate_steering_smoothness_reward(self, steering_angle):
+        steering_diff = abs(steering_angle - self.prev_steering_angle)
+        reward_steering_smoothness = math.exp(-0.5 * steering_diff)
+        self.prev_steering_angle = steering_angle
+        return reward_steering_smoothness
+
+
+# Initialize Reward object
+reward_obj = Reward()
+
+
 def reward_function(params):
-    '''
-    Reward function to encourage high speed, smooth steering,
-    and staying on track, with a focus on navigating bends.
-    '''
-
-    # Read input parameters
-    track_width = params['track_width']
-    distance_from_center = params['distance_from_center']
-    speed = params['speed']
-    steering = abs(params['steering_angle'])
-    steering_angle = params['steering_angle']
-    is_left_of_center = params['is_left_of_center']
-    is_offtrack = params['is_offtrack']
-    waypoints = params['waypoints']
-    closest_waypoints = params['closest_waypoints']
-    heading = params['heading']
-    progress = params['progress']
-    steps = params['steps']
-
-    # Constants
-    ABS_STEERING_THRESHOLD = 15
-    SPEED_THRESHOLD = 2.7
-    MAX_SPEED_THRESHOLD = 3.9
-    LOW_SPEED_PENALTY = 0.5
-    HIGH_SPEED_BONUS = 2
-    TOTAL_NUM_STEPS = 300
-
-    # Early termination if the car is off track
-    if is_offtrack:
-        return 1e-3
-
-    # Get the current and next waypoints
-    next_point = waypoints[closest_waypoints[1]]
-    prev_point = waypoints[closest_waypoints[0]]
-
-    # Calculate the direction of the track (heading to the next waypoint)
-    track_direction = math.atan2(next_point[1] - prev_point[1], next_point[0] - prev_point[0])
-    track_direction = math.degrees(track_direction)
-
-    # Calculate the difference between the track direction and the heading direction of the car
-    direction_diff = abs(track_direction - heading)
-    if direction_diff > 180:
-        direction_diff = 360 - direction_diff
-
-    bend_direction = track_direction - heading
-    if bend_direction > 180:
-        bend_direction -= 360
-    elif bend_direction < -180:
-        bend_direction += 360
-    # Calculate scaled distance from center
-    distance_from_center_scaled = distance_from_center / (track_width / 2.0)
-    # Penalty for high steering angles
-    steering_penalty = 1.0
-    if steering > 10:
-        steering_penalty = 0.5
-    if steering > ABS_STEERING_THRESHOLD:
-        steering_penalty = 0.2
-
-    # Reward for staying on the center line
-    if distance_from_center_scaled <= 0.1:
-        center_reward = 1.0
-    elif distance_from_center_scaled <= 0.25:
-        center_reward = 0.7
-    elif distance_from_center_scaled <= 0.5:
-        center_reward = 0.3
-    else:
-        center_reward = 0.1
-
-    # Encourage speed with penalties for going too slow or too fast
-    if speed < SPEED_THRESHOLD:
-        speed_reward = LOW_SPEED_PENALTY
-    elif speed > MAX_SPEED_THRESHOLD:
-        speed_reward = HIGH_SPEED_BONUS
-    else:
-        speed_reward = speed * 1.5
-
-    # Adjust reward for bends
-    bend_penalty = 1 - distance_from_center_scaled * 1.5
-    if direction_diff > ABS_STEERING_THRESHOLD:
-        if steering > ABS_STEERING_THRESHOLD:
-            steering_penalty = 1
-        else:
-            steering_penalty = 0.2
-        if speed > 2.7:
-            speed_reward = HIGH_SPEED_BONUS
-        if speed < 1.6:
-            speed_reward = LOW_SPEED_PENALTY
-        bend_penalty = 1
-
-        # Adjust for left and right bends
-        if bend_direction > 0:  # Right bend
-            print("right bend at progress",progress)
-            if is_left_of_center or steering_angle > 0:  # If car is on the left side
-                bend_penalty *= 0.2  # Penalize more
-            else:
-                bend_penalty *= 1
-        else:  # Left bend
-            print("left bend at progress", progress)
-            if not(is_left_of_center) or steering_angle < 0:  # If car is on the right side
-                bend_penalty *= 0.2  # Penalize more
-            else:
-                bend_penalty *= 1
-
-    reward = (center_reward * 2.0 + speed_reward * 3.5 + steering_penalty * 2.0) * bend_penalty
-
-    # Give additional reward if the car pass every 30 steps faster than expected
-    if (steps % 30) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
-        reward += 2*progress
-        print("step reward at", steps)
-    elif (steps % 30) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
-        reward -= 100-progress
-        print("panality progress at", steps)
-
-    return float(reward)
+    return reward_obj.reward_function(params)
