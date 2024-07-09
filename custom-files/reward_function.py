@@ -2,42 +2,62 @@ import math
 
 def reward_function(params):
     '''
-    Reward function to encourage high speed, smooth steering,
-    and staying on track, with a focus on navigating bends.
+    Reward function for AWS DeepRacer to navigate left and right bends at maximum speed
+    and stay at the extreme left during left turns and extreme right during right turns.
     '''
 
     # Read input parameters
     track_width = params['track_width']
     distance_from_center = params['distance_from_center']
     speed = params['speed']
-    steering = abs(params['steering_angle'])
-    steering_angle = params['steering_angle']
-    is_left_of_center = params['is_left_of_center']
-    is_offtrack = params['is_offtrack']
+    all_wheels_on_track = params['all_wheels_on_track']
     waypoints = params['waypoints']
     closest_waypoints = params['closest_waypoints']
     heading = params['heading']
-    progress = params['progress']
-    steps = params['steps']
+    is_left_of_center = params['is_left_of_center']
 
-    # Constants
-    ABS_STEERING_THRESHOLD = 15
-    SPEED_THRESHOLD = 2.7
-    MAX_SPEED_THRESHOLD = 3.9
-    LOW_SPEED_PENALTY = 0.5
-    HIGH_SPEED_BONUS = 2
-    TOTAL_NUM_STEPS = 300
+    # Initialize reward
+    reward = 1.0
 
-    # Early termination if the car is off track
-    if is_offtrack:
-        return 1e-3
+    # Reward for staying close to the left edge during left turns
+    left_edge_distance = 0.5 * track_width - distance_from_center
+    if is_left_of_center:
+        if left_edge_distance <= 0.1 * track_width:
+            reward += 1.0
+        elif left_edge_distance <= 0.25 * track_width:
+            reward += 0.5
+        else:
+            reward += 0.1
+    else:
+        reward += 0.1
 
-    # Get the current and next waypoints
-    next_point = waypoints[closest_waypoints[1]]
-    prev_point = waypoints[closest_waypoints[0]]
+    # Reward for staying close to the right edge during right turns
+    right_edge_distance = 0.5 * track_width - distance_from_center
+    if not is_left_of_center:
+        if right_edge_distance <= 0.1 * track_width:
+            reward += 1.0
+        elif right_edge_distance <= 0.25 * track_width:
+            reward += 0.5
+        else:
+            reward += 0.1
+    else:
+        reward += 0.1
 
-    # Calculate the direction of the track (heading to the next waypoint)
-    track_direction = math.atan2(next_point[1] - prev_point[1], next_point[0] - prev_point[0])
+    # Penalize if the car goes off track
+    if not all_wheels_on_track:
+        reward = 1e-3  # very low reward
+
+    # Reward for high speed
+    SPEED_THRESHOLD = 3.0  # define a speed threshold
+    if speed > SPEED_THRESHOLD:
+        reward += 1.0
+
+    # Reward for heading in the direction of the track (for smoothness)
+    next_waypoint = waypoints[closest_waypoints[1]]
+    prev_waypoint = waypoints[closest_waypoints[0]]
+
+    # Calculate the direction of the center line
+    track_direction = math.atan2(next_waypoint[1] - prev_waypoint[1], next_waypoint[0] - prev_waypoint[0])
     track_direction = math.degrees(track_direction)
 
     # Calculate the difference between the track direction and the heading direction of the car
@@ -45,73 +65,11 @@ def reward_function(params):
     if direction_diff > 180:
         direction_diff = 360 - direction_diff
 
-    bend_direction = track_direction - heading
-    if bend_direction > 180:
-        bend_direction -= 360
-    elif bend_direction < -180:
-        bend_direction += 360
-    # Calculate scaled distance from center
-    distance_from_center_scaled = distance_from_center / (track_width / 2.0)
-    # Penalty for high steering angles
-    steering_penalty = 1.0
-    if steering > 10:
-        steering_penalty = 0.5
-    if steering > ABS_STEERING_THRESHOLD:
-        steering_penalty = 0.2
-
-    # Reward for staying on the center line
-    if distance_from_center_scaled <= 0.1:
-        center_reward = 1.0
-    elif distance_from_center_scaled <= 0.25:
-        center_reward = 0.7
-    elif distance_from_center_scaled <= 0.5:
-        center_reward = 0.3
+    # Penalize if the difference is too large
+    DIRECTION_THRESHOLD = 10.0
+    if direction_diff < DIRECTION_THRESHOLD:
+        reward += 0.5
     else:
-        center_reward = 0.1
-
-    # Encourage speed with penalties for going too slow or too fast
-    if speed < SPEED_THRESHOLD:
-        speed_reward = LOW_SPEED_PENALTY
-    elif speed > MAX_SPEED_THRESHOLD:
-        speed_reward = HIGH_SPEED_BONUS
-    else:
-        speed_reward = speed * 1.5
-
-    # Adjust reward for bends
-    bend_penalty = 1 - distance_from_center_scaled * 1.5
-    if direction_diff > ABS_STEERING_THRESHOLD:
-        if steering > ABS_STEERING_THRESHOLD:
-            steering_penalty = 1
-        else:
-            steering_penalty = 0.2
-        if speed > 2.7:
-            speed_reward = HIGH_SPEED_BONUS
-        if speed < 1.6:
-            speed_reward = LOW_SPEED_PENALTY
-        bend_penalty = 1
-
-        # Adjust for left and right bends
-        if bend_direction > 0:  # Right bend
-            print("right bend at progress",progress)
-            if is_left_of_center or steering_angle > 0:  # If car is on the left side
-                bend_penalty *= 0.2  # Penalize more
-            else:
-                bend_penalty *= 1
-        else:  # Left bend
-            print("left bend at progress", progress)
-            if not(is_left_of_center) or steering_angle < 0:  # If car is on the right side
-                bend_penalty *= 0.2  # Penalize more
-            else:
-                bend_penalty *= 1
-
-    reward = (center_reward * 2.0 + speed_reward * 3.5 + steering_penalty * 2.0) * bend_penalty
-
-    # Give additional reward if the car pass every 30 steps faster than expected
-    if (steps % 30) == 0 and progress > (steps / TOTAL_NUM_STEPS) * 100:
-        reward += 2*progress
-        print("step reward at", steps)
-    elif (steps % 30) == 0 and progress < (steps / TOTAL_NUM_STEPS) * 100:
-        reward -= 100-progress
-        print("panality progress at", steps)
+        reward -= 0.5
 
     return float(reward)
