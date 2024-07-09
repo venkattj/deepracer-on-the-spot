@@ -80,15 +80,6 @@ def reward_function(params):
     # Adjust reward for bends
     bend_penalty = 1 - distance_from_center_scaled * 1.5
     if direction_diff > ABS_STEERING_THRESHOLD:
-        if distance_from_center_scaled <= 0.1:
-            center_reward = 0.1
-        elif distance_from_center_scaled <= 0.25:
-            center_reward = 0.3
-        elif distance_from_center_scaled <= 0.5:
-            center_reward = 0.7
-        else:
-            center_reward = 1
-
         if steering > ABS_STEERING_THRESHOLD:
             steering_penalty = 1
         else:
